@@ -19,21 +19,21 @@ while run:
                 
                 sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (2, 1, 35);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (18, 1, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (10, 1, 35);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (5, 1, 15);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (5, 1, 25);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (12, 2, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (16, 2, 75);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (42, 2, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (27, 2, 75);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (101, 2, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (89, 2, 65);"
                 cur.execute(sql)                
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (9, 3, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (19, 3, 300);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (17, 3, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (183, 3, 300);"
                 cur.execute(sql)
-                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (45, 3, 20);"
+                sql = "INSERT INTO airplanes (tail_number, type_code, seats) VALUES (47, 3, 290);"
                 cur.execute(sql)                
                 print("\nINSERTED")        
             
@@ -45,10 +45,14 @@ while run:
         elif (str(option) == '3'):
                 sql = "DELETE FROM airplanes WHERE type_code = 1;"
                 cur.execute(sql)
+                sql = "DELETE FROM airplanes WHERE type_code = 2;"
+                cur.execute(sql)
+                sql = "DELETE FROM airplanes WHERE type_code = 3;"
+                cur.execute(sql)                
                 print("\nDELETED")
         
         elif (str(option) == '4'):
-                sql = "SELECT * FROM airplanes;"
+                sql = "SELECT * FROM airplanes WHERE seats = 300;"
                 cur.execute(sql)
                 print(cur.fetchall())
                 
