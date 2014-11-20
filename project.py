@@ -52,7 +52,7 @@ def sql_print_column_names(columns):
                 i += 1
                 j += 1
 
-def print_table(rows, options = [], sort = 0):
+def print_table(rows, options = []):
         table = PrettyTable()
         names = rows[0]
         table.field_names = names
@@ -60,26 +60,18 @@ def print_table(rows, options = [], sort = 0):
                 table.add_row(rows[i])
 
 
-        if sort == 0:
-                print("\nSort by which column?")
-                sql_print_column_names(names)
-                option = input("Sort by (Enter 0 to skip sorting): ")
-                if str(option) != '0':
-                        sort = names[int(option)-1]
-<<<<<<< HEAD
-                        table.get_string(sortby = str(sort))
+        #if sort == 0:
+                #print("\nSort by which column?")
+                #sql_print_column_names(names)
+                #option = input("Sort by (Enter 0 to skip sorting): ")
+                #if str(option) != '0':
+                        #sort = names[int(option)-1]
+                        #table.get_string(sortby = str(sort))
         
-        elif sort == 1:
-                table.get_string(sortby = "code")
-        
-=======
-                        table.sortby = sort
+        #elif sort == 1:
+                #table.get_string(sortby = "code")
+                #table.sortby = sort
 
-        elif sort == 1:
-                print('here')
-                table.sortby = "code"
-
->>>>>>> origin/master
         index = []
         index.extend(range(1, len(rows)))
         table.add_column("index", index)
@@ -113,13 +105,30 @@ def sql_get_all(table):
         return rows
 
 def create_reservation():
+        pass_name = input("Enter passenger's name: ")
+        pass_phone = input("Enter passenger's phone number (no hyphens or spaces): ")
+        
         print("Choose destinations.\n")
         rows = sql_get_all('airports')
-        print_table(rows, sort = 1)
+        print_table(rows)
+        
         start = input("Starting destination index number: ")
-        start_code = rows[int(start)]
+        start_code = rows[int(start)][0]
         end = input("Ending destination index number: ")
-        end_code = rows[int(end)]
+        end_code = rows[int(end)][0]
+        depart_date = input("Departure date (yyyy-mm-dd): ")
+        
+        sql = "SELECT * FROM flights WHERE start_point='{}' AND end_point='{}';".format(start_code, end_code)
+        cur.execute(sql)
+        sql = "SELECT * FROM leg_instance WHERE flight_num = {}  AND date = '{}'".format(cur.fetchall()[0][0], depart_date)
+        cur.execute(sql)
+        legs = cur.fetchall()
+        for leg in legs:
+                sql = "INSERT INTO reservations (seat_num, date, flight_num, leg_num, pass_phone, pass_name) VALUES ({},'{}',{},{},'{}','{}')".format(1, depart_date, leg[1], leg[2], pass_phone, pass_name)
+                cur.execute(sql)
+        conn.commit()
+        #leg_instance = date, flight_num, leg_num, tail_number, seats, depart_time, arrival_time, index
+        #reservations = seat_num, date, flight_num, leg_num, pass_phone, pass_name, index
 
 def get_weekday(num):
         days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -136,7 +145,7 @@ def populate_week():
 def populate_day(date):
         weekday = get_weekday(date.weekday())
         planes = check_planes(date)
-        print(planes)
+        
 
         sql = "select * from flights where " + weekday + "=true;"
         cur.execute(sql)
@@ -147,9 +156,7 @@ def populate_day(date):
                 cur.execute(sql)
                 for leg in cur.fetchall():
                         sql = "insert into leg_instance (date, flight_num, leg_num, tail_number, depart_time, arrival_time) values ('{}', {}, {}, {}, '{}', '{}');".format(date_str(date), leg[1], leg[0], planes.pop(), leg[4], leg[5])
-                        print(sql)
-                        cur.execute(sql)
-        print(planes, "\n")
+                        cur.execute(sql) 
         conn.commit()
 
 def date_str(date):
@@ -169,6 +176,8 @@ def check_planes(date):
                 all_planes.append(row[0])
 
         return(list(set(all_planes)-set(used_planes)))
+
+
 while run:
         print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Multi-Flight Trip\n5. Cancel Trip\n6. EXIT")
 
