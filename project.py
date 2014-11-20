@@ -11,6 +11,19 @@ print("Connected")
 cur = conn.cursor()
 run = True
 
+def edit():
+        print("OPTIONS:\n1. CREATE\n2. UPDATE\n3.DELETE")
+        option = input("Choose an option: ")
+        if str(options) == '1':
+                sql = input("Enter create statement: ")
+                cur.execute(sql)
+        elif str(options) == '2':
+                sql = input("Enter update statement: ")
+                cur.execute(sql)
+        elif str(options) == '3':
+                sql = input("Enter delete statement: ")
+                cur.execute(sql)
+
 def entry(options = []):
         print("\nTables:\n")
         sql="select table_name from information_schema.tables where table_schema='public';"
@@ -52,11 +65,10 @@ def print_table(rows, options = [], sort = 0):
                 option = input("Sort by (Enter 0 to skip sorting): ")
                 if str(option) != '0':
                         sort = names[int(option)-1]
-                        table.sortby = sort
+                        table.get_string(sortby = str(sort))
         
         elif sort == 1:
-                print('here')
-                table.sortby = "code"
+                table.get_string(sortby = "code")
         
         index = []
         index.extend(range(1, len(rows)))
@@ -91,9 +103,13 @@ def sql_get_all(table):
         return rows
 
 def create_reservation():
-        print("Choose starting destination.")
+        print("Choose destinations.\n")
         rows = sql_get_all('airports')
         print_table(rows, sort = 1)
+        start = input("Starting destination index number: ")
+        start_code = rows[int(start)]
+        end = input("Ending destination index number: ")
+        end_code = rows[int(end)]
 
 
 
@@ -104,7 +120,7 @@ while run:
         option = input("Choose an option: ")
 
         if (str(option) == '1'):
-                entry()
+                edit()
         elif (str(option) == '2'):
                 entry()
         elif (str(option) == '3'):
