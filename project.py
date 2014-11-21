@@ -1,12 +1,13 @@
 import psycopg2
 import datetime
+import re
 from prettytable import PrettyTable
 
 
-print("Connecting...")
+print("\nConnecting...")
 # Connect to an existing database
 conn = psycopg2.connect(database="Project", user="Project", host="162.243.19.108")
-print("Connected")
+print("Connected\n")
 
 # Open a cursor to perform database operations
 cur = conn.cursor()
@@ -118,11 +119,13 @@ def create_reservation(round_trip = False):
         end_code = rows[int(end)][0]
         depart_date = input("Departure date (yyyy-mm-dd): ")
 
-        get_trip(start_code, end_code, depart_date, pass_name, pass_phone)
+        cost = get_trip(start_code, end_code, depart_date, pass_name, pass_phone)
 
         if round_trip == True:
                 return_date = input("Return Date (yyyy-mm-dd): ")
-                get_trip(end_code, start_code, return_date, pass_name, pass_phone)
+                return_cost = get_trip(end_code, start_code, return_date, pass_name, pass_phone)
+                total_cost = get_total_cost(cost, return_cost)
+                print("Total cost of your round trip is $" + str(total_cost))
 
 def create_multiflight():
         pass_name = input("Enter passenger's name: ")
@@ -211,11 +214,19 @@ def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
                         cur.execute("UPDATE leg_instance SET seats = " + str(seats) + " WHERE leg_num = " + str(leg[2]) + " AND date = '" + depart_date + "';")
 
                 cur.execute("select cost from fares where code = " + str(flight[1]) + ";")
-                print("Cost for flight from", start_code, "to", end_code, "is " + str(cur.fetchall()[0][0]))
+                cost = cur.fetchall()[0][0]
+                print("Cost for flight from", start_code, "to", end_code, "is " + str(cost))
                 conn.commit()
+                return cost
         else: print("No Available flights with those parameters")
         #leg_instance = date, flight_num, leg_num, tail_number, seats, depart_time, arrival_time, index
         #reservations = seat_num, date, flight_num, leg_num, pass_phone, pass_name, index
+        
+def get_total_cost(cost, return_cost):
+        cost = re.sub('[$]', '', cost)
+        return_cost = re.sub('[$]', '', return_cost)
+        total_cost = float(cost) + float(return_cost)
+        return total_cost
 
 def get_weekday(num):
         days = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
