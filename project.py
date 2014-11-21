@@ -197,6 +197,32 @@ def check_planes(date):
 
         return(list(set(all_planes)-set(used_planes)))
 
+def cancel_reservation():
+        sql="select column_name from information_schema.columns where table_name='{}';".format("reservations")
+        cur.execute(sql)
+        columns = cur.fetchall()
+        names = []
+        rows = []
+        for name in columns:
+                names.append(name[0])
+        rows.append(names)        
+        pass_phone = input("Enter customer phone number: ")
+        sql = "SELECT * FROM reservations WHERE pass_phone = '{}';".format(pass_phone)
+        cur.execute(sql)
+        results = cur.fetchall()
+        for row in results:
+                data = []
+                i = 0
+                for datum in row:
+                        data.append(row[i])
+                        i += 1
+                rows.append(data)
+        print_table(rows)
+        
+        delete_date = input("Enter date of reservation to cancel (yyyy-mm-dd): ")
+        sql = "DELETE FROM reservations WHERE date = '{}' AND pass_phone = '{}'".format(delete_date, pass_phone)
+        cur.execute(sql)
+
 
 while run:
         print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Multi-Flight Trip\n5. Cancel Trip\n6. EXIT")
@@ -205,22 +231,39 @@ while run:
 
         if (str(option) == '1'):
                 edit()
+                input("Press Enter to continue...")
+                print("\n")
+                
         elif (str(option) == '2'):
                 entry()
+                input("Press Enter to continue...")
+                print("\n")
+                
         elif (str(option) == '3'):
                 populate_week()
                 create_reservation()
+                input("Press Enter to continue...")
+                print("\n")                
+                
         elif (str(option) == '4'):
                 populate_week()
                 create_reservation(True)
+                input("Press Enter to continue...")
+                print("\n")                
+
+        elif (str(option) == '5'):
+                cancel_reservation()
+                input("Press Enter to continue...")
+                print("\n")                
 
         elif (str(option) == '6'):
                 run = False
         else:
                 print("Invalid option choice!\n")
+                input("Press Enter to continue...")
+                print("\n")                
 
-        input("Press Enter to continue...")
-        print("\n")
+        
 
         # Query the database and obtain data as Python objects
         #cur.execute("select * from people;")
