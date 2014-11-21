@@ -67,7 +67,7 @@ def print_table(rows, options = []):
                 #if str(option) != '0':
                         #sort = names[int(option)-1]
                         #table.get_string(sortby = str(sort))
-        
+
         #elif sort == 1:
                 #table.get_string(sortby = "code")
                 #table.sortby = sort
@@ -104,29 +104,45 @@ def sql_get_all(table):
 
         return rows
 
-def create_reservation():
+def create_reservation(round_trip = False):
         pass_name = input("Enter passenger's name: ")
         pass_phone = input("Enter passenger's phone number (no hyphens or spaces): ")
-        
+
         print("Choose destinations.\n")
         rows = sql_get_all('airports')
         print_table(rows)
-        
+
         start = input("Starting destination index number: ")
         start_code = rows[int(start)][0]
         end = input("Ending destination index number: ")
         end_code = rows[int(end)][0]
         depart_date = input("Departure date (yyyy-mm-dd): ")
-        
+
+        get_trip(start_code, end_code, depart_date, pass_name, pass_phone)
+
+        if round_trip == True:
+                return_date = input("Return Date (yyyy-mm-dd): ")
+                get_trip(end_code, start_code, return_date, pass_name, pass_phone)
+
+def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
         sql = "SELECT * FROM flights WHERE start_point='{}' AND end_point='{}';".format(start_code, end_code)
         cur.execute(sql)
-        sql = "SELECT * FROM leg_instance WHERE flight_num = {}  AND date = '{}'".format(cur.fetchall()[0][0], depart_date)
+        sql = "SELECT * FROM leg_instance WHERE flight_num = {}  AND date = '{}' AND seats > 0".format(cur.fetchall()[0][0], depart_date)
         cur.execute(sql)
         legs = cur.fetchall()
-        for leg in legs:
-                sql = "INSERT INTO reservations (seat_num, date, flight_num, leg_num, pass_phone, pass_name) VALUES ({},'{}',{},{},'{}','{}')".format(1, depart_date, leg[1], leg[2], pass_phone, pass_name)
-                cur.execute(sql)
-        conn.commit()
+        if len(legs) > 0:
+                for leg in legs:
+                        seats = leg[4] - 1
+                        sql = "SELECT max(seat_num) from reservations WHERE leg_num = " + str(leg[2]) + " and date ='" + depart_date + "';"
+                        cur.execute(sql)
+                        test = cur.fetchall()[0][0]
+                        if test == None: test = 0
+
+                        seat_num = int(test) + 1
+                        sql = "INSERT INTO reservations (seat_num, date, flight_num, leg_num, pass_phone, pass_name) VALUES ({},'{}',{},{},'{}','{}')".format(seat_num, depart_date, leg[1], leg[2], pass_phone, pass_name)
+                        cur.execute(sql)
+                        cur.execute("UPDATE leg_instance SET seats = " + str(seats) + " WHERE leg_num = " + str(leg[2]) + " AND date = '" + depart_date + "';")
+                conn.commit()
         #leg_instance = date, flight_num, leg_num, tail_number, seats, depart_time, arrival_time, index
         #reservations = seat_num, date, flight_num, leg_num, pass_phone, pass_name, index
 
@@ -145,7 +161,7 @@ def populate_week():
 def populate_day(date):
         weekday = get_weekday(date.weekday())
         planes = check_planes(date)
-        
+
 
         sql = "select * from flights where " + weekday + "=true;"
         cur.execute(sql)
@@ -156,7 +172,7 @@ def populate_day(date):
                 cur.execute(sql)
                 for leg in cur.fetchall():
                         sql = "insert into leg_instance (date, flight_num, leg_num, tail_number, depart_time, arrival_time) values ('{}', {}, {}, {}, '{}', '{}');".format(date_str(date), leg[1], leg[0], planes.pop(), leg[4], leg[5])
-                        cur.execute(sql) 
+                        cur.execute(sql)
         conn.commit()
 
 def date_str(date):
@@ -191,9 +207,8 @@ while run:
                 populate_week()
                 create_reservation()
         elif (str(option) == '4'):
-                sql = "SELECT * FROM airplanes WHERE seats = 300;"
-                cur.execute(sql)
-                print(cur.fetchall())
+                populate_week()
+                create_reservation(True)
 
         elif (str(option) == '6'):
                 run = False
