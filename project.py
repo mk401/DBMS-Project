@@ -135,17 +135,59 @@ def create_multiflight():
         final = input("Final destination index number: ")
         final_code = rows[int(final)][0]
 
+
+        sql="select column_name from information_schema.columns where table_name='flights';"
+        cur.execute(sql)
+        i = 0
+        columns = cur.fetchall()
+        names = []
+        rows = []
+        for name in columns:
+                names.append(name[0])
+        rows.append(names)
+
         sql = "select * from flights where end_point = '" + final_code + "';"
         cur.execute(sql)
         mids = cur.fetchall()
-        print_table(mids)
+        for row in mids:
+                data = []
+                i = 0
+                for datum in row:
+                        data.append(row[i])
+                        i += 1
+                rows.append(data)
+        print_table(rows)
 
+        mid = input("Midpoint destination index number: ")
+        mid_code = rows[int(mid)][10]
+        mid_flight = rows[int(mid)]
 
-        end = input("Ending destination index number: ")
-        end_code = rows[int(end)][0]
+        sql = "select * from flights where end_point = '" + mid_code + "';"
+        cur.execute(sql)
+        starts = cur.fetchall()
+        rows = []
+        rows.append(names)
+        for row in starts:
+                data = []
+                i = 0
+                for datum in row:
+                        data.append(row[i])
+                        i += 1
+                rows.append(data)
+        print_table(rows)
+
+        start = input("Starting Location index number: ")
+        start_code = rows[int(start)][10]
+        start_flight = rows[int(start)]
+
         depart_date = input("Departure date (yyyy-mm-dd): ")
+        depart_date = datetime.datetime(int(depart_date[0:4]), int(depart_date[5:7]), int(depart_date[8:10]))
+        second_date = depart_date
+        if start_flight[depart_date.weekday() + 1] != mid_flight[depart_date.weekday()]:
+                second_date += datetime.timedelta(days = 1)
 
-        get_trip(start_code, end_code, depart_date, pass_name, pass_phone)
+        get_trip(start_code, mid_code, date_str(depart_date), pass_name, pass_phone)
+        get_trip(mid_code, final_code, date_str(second_date), pass_name, pass_phone)
 
 
 def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
@@ -256,7 +298,7 @@ def change_reservation():
         rows = []
         for name in columns:
                 names.append(name[0])
-        rows.append(names)        
+        rows.append(names)
         pass_phone = input("Enter customer phone number: ")
         sql = "SELECT * FROM reservations WHERE pass_phone = '{}';".format(pass_phone)
         cur.execute(sql)
@@ -269,7 +311,7 @@ def change_reservation():
                         i += 1
                 rows.append(data)
         print_table(rows)
-        
+
         delete_date = input("Enter date of reservation to change (yyyy-mm-dd): ")
         sql = "SELECT * FROM reservations WHERE date = '{}' AND pass_phone = '{}'".format(delete_date, pass_phone)
         cur.execute(sql)
@@ -286,18 +328,14 @@ def change_reservation():
         sql = "DELETE FROM reservations WHERE date = '{}' AND pass_phone = '{}';".format(delete_date, pass_phone)
         cur.execute(sql)
         new_date = input("Enter new date of reservation (yyyy-mm-dd): ")
-        
+
         get_trip(start_code, end_code, new_date, pass_name, pass_phone)
-        
+
         #flight = flight_num | monday | tuesday | wednesday | thursday | friday | saturday | sunday |  airline   | fare_code | start_point | end_point | index
         #reservations = | date | seat_num | flight_num | leg_num | pass_phone | pass_name | index |
 
 while run:
-<<<<<<< HEAD
-        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Round Trip\n5. Plan Multi-Flight Trip \n6. Cancel Trip\n7. EXIT")
-=======
-        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Multi-Flight Trip\n5. Change Reservation\n6. Cancel Trip\n7. EXIT")
->>>>>>> origin/master
+        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Round Trip\n5. Plan Multi-Flight Trip \n6. Change Trip\n7. Cancel Trip\n8. EXIT")
 
         option = input("Choose an option: ")
 
@@ -324,22 +362,20 @@ while run:
                 print("\n")
 
         elif (str(option) == '5'):
-<<<<<<< HEAD
                 populate_week()
                 create_multiflight()
 
-=======
-                change_reservation()
-                input("Press Enter to continue...")
-                print("\n")    
-                
->>>>>>> origin/master
         elif (str(option) == '6'):
-                cancel_reservation()
+                change_reservation()
                 input("Press Enter to continue...")
                 print("\n")
 
         elif (str(option) == '7'):
+                cancel_reservation()
+                input("Press Enter to continue...")
+                print("\n")
+
+        elif (str(option) == '8'):
                 run = False
         else:
                 print("Invalid option choice!\n")
