@@ -145,8 +145,9 @@ def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
                         cur.execute("UPDATE leg_instance SET seats = " + str(seats) + " WHERE leg_num = " + str(leg[2]) + " AND date = '" + depart_date + "';")
 
                 cur.execute("select cost from fares where code = " + str(flight[1]) + ";")
-                print("Cost for flight from", start_code, "to", end_code, "costs " + str(cur.fetchall()[0][0]))
+                print("Cost for flight from", start_code, "to", end_code, "is " + str(cur.fetchall()[0][0]))
                 conn.commit()
+        else: print("No Available flights with those parameters")
         #leg_instance = date, flight_num, leg_num, tail_number, seats, depart_time, arrival_time, index
         #reservations = seat_num, date, flight_num, leg_num, pass_phone, pass_name, index
 
