@@ -125,9 +125,10 @@ def create_reservation(round_trip = False):
                 get_trip(end_code, start_code, return_date, pass_name, pass_phone)
 
 def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
-        sql = "SELECT * FROM flights WHERE start_point='{}' AND end_point='{}';".format(start_code, end_code)
+        sql = "SELECT flight_num, fare_code FROM flights WHERE start_point='{}' AND end_point='{}';".format(start_code, end_code)
         cur.execute(sql)
-        sql = "SELECT * FROM leg_instance WHERE flight_num = {}  AND date = '{}' AND seats > 0".format(cur.fetchall()[0][0], depart_date)
+        flight = cur.fetchall()[0]
+        sql = "SELECT * FROM leg_instance WHERE flight_num = {}  AND date = '{}' AND seats > 0".format(flight[0], depart_date)
         cur.execute(sql)
         legs = cur.fetchall()
         if len(legs) > 0:
@@ -142,6 +143,9 @@ def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
                         sql = "INSERT INTO reservations (seat_num, date, flight_num, leg_num, pass_phone, pass_name) VALUES ({},'{}',{},{},'{}','{}')".format(seat_num, depart_date, leg[1], leg[2], pass_phone, pass_name)
                         cur.execute(sql)
                         cur.execute("UPDATE leg_instance SET seats = " + str(seats) + " WHERE leg_num = " + str(leg[2]) + " AND date = '" + depart_date + "';")
+
+                cur.execute("select cost from fares where code = " + str(flight[1]) + ";")
+                print("Cost for flight from", start_code, "to", end_code, "costs " + str(cur.fetchall()[0][0]))
                 conn.commit()
         #leg_instance = date, flight_num, leg_num, tail_number, seats, depart_time, arrival_time, index
         #reservations = seat_num, date, flight_num, leg_num, pass_phone, pass_name, index
