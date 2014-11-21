@@ -14,7 +14,7 @@ run = True
 
 def edit():
         print("OPTIONS:\n1. CREATE\n2. UPDATE\n3.DELETE")
-        option = input("Choose an option: ")
+        options = input("Choose an option: ")
         if str(options) == '1':
                 sql = input("Enter create statement: ")
                 cur.execute(sql)
@@ -124,6 +124,30 @@ def create_reservation(round_trip = False):
                 return_date = input("Return Date (yyyy-mm-dd): ")
                 get_trip(end_code, start_code, return_date, pass_name, pass_phone)
 
+def create_multiflight():
+        pass_name = input("Enter passenger's name: ")
+        pass_phone = input("Enter passenger's phone number (no hyphens or spaces): ")
+
+        print("Choose the destination.\n")
+        rows = sql_get_all('airports')
+        print_table(rows)
+
+        final = input("Final destination index number: ")
+        final_code = rows[int(final)][0]
+
+        sql = "select * from flights where end_point = '" + final_code + "';"
+        cur.execute(sql)
+        mids = cur.fetchall()
+        print_table(mids)
+
+
+        end = input("Ending destination index number: ")
+        end_code = rows[int(end)][0]
+        depart_date = input("Departure date (yyyy-mm-dd): ")
+
+        get_trip(start_code, end_code, depart_date, pass_name, pass_phone)
+
+
 def get_trip(start_code, end_code, depart_date, pass_name, pass_phone):
         sql = "SELECT flight_num, fare_code FROM flights WHERE start_point='{}' AND end_point='{}';".format(start_code, end_code)
         cur.execute(sql)
@@ -206,7 +230,7 @@ def cancel_reservation():
         rows = []
         for name in columns:
                 names.append(name[0])
-        rows.append(names)        
+        rows.append(names)
         pass_phone = input("Enter customer phone number: ")
         sql = "SELECT * FROM reservations WHERE pass_phone = '{}';".format(pass_phone)
         cur.execute(sql)
@@ -219,14 +243,14 @@ def cancel_reservation():
                         i += 1
                 rows.append(data)
         print_table(rows)
-        
+
         delete_date = input("Enter date of reservation to cancel (yyyy-mm-dd): ")
         sql = "DELETE FROM reservations WHERE date = '{}' AND pass_phone = '{}'".format(delete_date, pass_phone)
         cur.execute(sql)
 
 
 while run:
-        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Multi-Flight Trip\n5. Cancel Trip\n6. EXIT")
+        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Round Trip\n5. Plan Multi-Flight Trip \n6. Cancel Trip\n7. EXIT")
 
         option = input("Choose an option: ")
 
@@ -234,37 +258,41 @@ while run:
                 edit()
                 input("Press Enter to continue...")
                 print("\n")
-                
+
         elif (str(option) == '2'):
                 entry()
                 input("Press Enter to continue...")
                 print("\n")
-                
+
         elif (str(option) == '3'):
                 populate_week()
                 create_reservation()
                 input("Press Enter to continue...")
-                print("\n")                
-                
+                print("\n")
+
         elif (str(option) == '4'):
                 populate_week()
                 create_reservation(True)
                 input("Press Enter to continue...")
-                print("\n")                
+                print("\n")
 
         elif (str(option) == '5'):
-                cancel_reservation()
-                input("Press Enter to continue...")
-                print("\n")                
+                populate_week()
+                create_multiflight()
 
         elif (str(option) == '6'):
+                cancel_reservation()
+                input("Press Enter to continue...")
+                print("\n")
+
+        elif (str(option) == '7'):
                 run = False
         else:
                 print("Invalid option choice!\n")
                 input("Press Enter to continue...")
-                print("\n")                
+                print("\n")
 
-        
+
 
         # Query the database and obtain data as Python objects
         #cur.execute("select * from people;")
