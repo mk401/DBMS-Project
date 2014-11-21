@@ -222,7 +222,7 @@ def check_planes(date):
 
         return(list(set(all_planes)-set(used_planes)))
 
-def cancel_reservation():
+def cancel_reservation(delete_date = None, pass_phone = None):
         sql="select column_name from information_schema.columns where table_name='{}';".format("reservations")
         cur.execute(sql)
         columns = cur.fetchall()
@@ -248,9 +248,56 @@ def cancel_reservation():
         sql = "DELETE FROM reservations WHERE date = '{}' AND pass_phone = '{}'".format(delete_date, pass_phone)
         cur.execute(sql)
 
+def change_reservation():
+        sql="select column_name from information_schema.columns where table_name='{}';".format("reservations")
+        cur.execute(sql)
+        columns = cur.fetchall()
+        names = []
+        rows = []
+        for name in columns:
+                names.append(name[0])
+        rows.append(names)        
+        pass_phone = input("Enter customer phone number: ")
+        sql = "SELECT * FROM reservations WHERE pass_phone = '{}';".format(pass_phone)
+        cur.execute(sql)
+        results = cur.fetchall()
+        for row in results:
+                data = []
+                i = 0
+                for datum in row:
+                        data.append(row[i])
+                        i += 1
+                rows.append(data)
+        print_table(rows)
+        
+        delete_date = input("Enter date of reservation to change (yyyy-mm-dd): ")
+        sql = "SELECT * FROM reservations WHERE date = '{}' AND pass_phone = '{}'".format(delete_date, pass_phone)
+        cur.execute(sql)
+        results = cur.fetchall()[0]
+        seat_num = results[1]
+        flight_num = results[2]
+        pass_phone = results[4]
+        pass_name = results[5]
+        sql = "SELECT * FROM flights WHERE flight_num = {};".format(flight_num)
+        cur.execute(sql)
+        results = cur.fetchall()[0]
+        start_code = results[10]
+        end_code = results[11]
+        sql = "DELETE FROM reservations WHERE date = '{}' AND pass_phone = '{}';".format(delete_date, pass_phone)
+        cur.execute(sql)
+        new_date = input("Enter new date of reservation (yyyy-mm-dd): ")
+        
+        get_trip(start_code, end_code, new_date, pass_name, pass_phone)
+        
+        #flight = flight_num | monday | tuesday | wednesday | thursday | friday | saturday | sunday |  airline   | fare_code | start_point | end_point | index
+        #reservations = | date | seat_num | flight_num | leg_num | pass_phone | pass_name | index |
 
 while run:
+<<<<<<< HEAD
         print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Round Trip\n5. Plan Multi-Flight Trip \n6. Cancel Trip\n7. EXIT")
+=======
+        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Multi-Flight Trip\n5. Change Reservation\n6. Cancel Trip\n7. EXIT")
+>>>>>>> origin/master
 
         option = input("Choose an option: ")
 
@@ -277,9 +324,16 @@ while run:
                 print("\n")
 
         elif (str(option) == '5'):
+<<<<<<< HEAD
                 populate_week()
                 create_multiflight()
 
+=======
+                change_reservation()
+                input("Press Enter to continue...")
+                print("\n")    
+                
+>>>>>>> origin/master
         elif (str(option) == '6'):
                 cancel_reservation()
                 input("Press Enter to continue...")
