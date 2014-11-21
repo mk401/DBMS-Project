@@ -13,10 +13,10 @@ cur = conn.cursor()
 run = True
 
 def edit():
-        print("OPTIONS:\n1. CREATE\n2. UPDATE\n3.DELETE")
+        print("OPTIONS:\n1. INSERT\n2. UPDATE\n3. DELETE")
         options = input("Choose an option: ")
         if str(options) == '1':
-                sql = input("Enter create statement: ")
+                sql = input("Enter insert statement: ")
                 cur.execute(sql)
         elif str(options) == '2':
                 sql = input("Enter update statement: ")
@@ -335,7 +335,7 @@ def change_reservation():
         #reservations = | date | seat_num | flight_num | leg_num | pass_phone | pass_name | index |
 
 while run:
-        print("OPTIONS:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Round Trip\n5. Plan Multi-Flight Trip \n6. Change Trip\n7. Cancel Trip\n8. EXIT")
+        print("MAIN MENU:\n1. Manual Entry\n2. View Data\n3. Plan Trip\n4. Plan Round Trip\n5. Plan Multi-Flight Trip \n6. Change Trip\n7. Cancel Trip\n8. EXIT\n")
 
         option = input("Choose an option: ")
 
@@ -382,13 +382,6 @@ while run:
                 input("Press Enter to continue...")
                 print("\n")
 
-
-
-        # Query the database and obtain data as Python objects
-        #cur.execute("select * from people;")
-        #print(cur.fetchall())
-
-        # Make the changes to the database persistent
         conn.commit()
 
 
